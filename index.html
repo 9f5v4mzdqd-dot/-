@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>24色のセルフ・カラーセラピー</title>
+    <style>
+        :root { --bg-color: #fcfcfc; --text-color: #333; }
+        body {
+            font-family: 'Helvetica Neue', Arial, "Hiragino Kaku Gothic ProN", sans-serif;
+            background-color: var(--bg-color); color: var(--text-color);
+            margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center;
+            min-height: 100vh; transition: background-color 1s ease, color 1s ease;
+        }
+        .container { width: 100%; max-width: 500px; text-align: center; }
+        
+        /* ふわっとさせるアニメーション */
+        .fade-in { animation: fadeIn 0.8s ease forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        h1 { font-size: 1.3rem; margin-top: 20px; }
+        .step-text { font-size: 0.9rem; margin-bottom: 15px; color: #666; }
+
+        /* 24色のグリッド */
+        .color-grid {
+            display: grid; grid-template-columns: repeat(4, 1fr);
+            gap: 10px; margin-bottom: 25px;
+        }
+        .color-btn {
+            aspect-ratio: 1; border: none; border-radius: 50%;
+            cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        .color-btn:hover { transform: scale(1.1); }
+
+        /* 入力・結果エリア */
+        #input-section, #result-section { display: none; }
+        textarea {
+            width: 90%; height: 120px; padding: 15px; border-radius: 15px;
+            border: 1px solid #ddd; font-size: 1rem; margin-bottom: 15px; outline: none;
+        }
+        .primary-btn {
+            background: #333; color: white; border: none;
+            padding: 12px 30px; border-radius: 25px; font-size: 1rem; cursor: pointer;
+        }
+
+        /* 履歴表示 */
+        .history-section { margin-top: 50px; text-align: left; border-top: 1px solid #eee; padding-top: 20px; }
+        .history-item { 
+            background: white; padding: 10px; border-radius: 10px; margin-bottom: 10px; 
+            display: flex; align-items: center; font-size: 0.8rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            color: #333;
+        }
+        .history-color-dot { width: 15px; height: 15px; border-radius: 50%; margin-right: 10px; border: 1px solid #eee; }
+    </style>
+</head>
+<body>
+
+<div class="container fade-in" id="app">
+    <div id="step1">
+        <h1>今のあなたの気になる色は？</h1>
+        <p class="step-text">24色の中から直感で選んでください</p>
+        <div class="color-grid" id="grid"></div>
+        
+        <div class="history-section" id="history-area">
+            <h3>これまでの記録</h3>
+            <div id="history-list"></div>
+        </div>
+    </div>
+
+    <div id="input-section" class="fade-in">
+        <h1 id="selected-color-title"></h1>
+        <textarea id="reason-input" placeholder="今の気持ち、なぜこの色が気になったか自由に書いてみてください..."></textarea>
+        <br>
+        <button class="primary-btn" onclick="saveAndShowResult()">保存して診断結果を見る</button>
+    </div>
+
+    <div id="result-section" class="fade-in">
+        <h2 id="res-name"></h2>
+        <div id="res-user-reason" style="background: rgba(255,255,255,0.8); padding: 15px; border-radius: 10px; text-align: left; margin: 15px 0; color: #333;"></div>
+        <p id="res-message" style="line-height: 1.8;"></p>
+        <button class="primary-btn" onclick="location.reload()">最初に戻る</button>
+    </div>
+</div>
+
+<script>
+    const colors = [
+        // 既存12色 + 新12色
+        { id:'red', code:'#FF3B30', name:'レッド', msg:'活力と情熱。前進する力が湧いています。' },
+        { id:'deep-red', code:'#8B0000', name:'ダークレッド', msg:'深い情熱と忍耐。静かに闘志を燃やしています。' },
+        { id:'orange', code:'#FF9500', name:'オレンジ', msg:'明るさと社交性。人との交流を楽しみたい時。' },
+        { id:'apricot', code:'#FFDAB9', name:'アプリコット', msg:'温和と親しみ。心穏やかに過ごしたい状態です。' },
+        { id:'yellow', code:'#FFCC00', name:'イエロー', msg:'希望と好奇心。新しい発見を求めています。' },
+        { id:'lemon', code:'#FFFACD', name:'レモン', msg:'リフレッシュと浄化。心を軽くしたい時。' },
+        { id:'green', code:'#28CD41', name:'グリーン', msg:'調和と癒やし。自然な自分に戻りたい時です。' },
+        { id:'forest', code:'#228B22', name:'フォレスト', msg:'安定と成長。着実に歩みを進めたい時。' },
+        { id:'mint', code:'#98FB98', name:'ミント', msg:'新しい始まり。爽やかな変化を求めています。' },
+        { id:'turquoise', code:'#40E0D0', name:'ターコイズ', msg:'創造性と自由。自分の表現を楽しみたい時。' },
+        { id:'blue', code:'#007AFF', name:'ブルー', msg:'誠実と知性。冷静に自分を見つめています。' },
+        { id:'navy', code:'#000080', name:'ネイビー', msg:'深い思考と静寂。本質を追求したい時。' },
+        { id:'sky-blue', code:'#87CEEB', name:'スカイブルー', msg:'開放感と希望。のびのびと過ごしたい状態。' },
+        { id:'purple', code:'#AF52DE', name:'パープル', msg:'インスピレーションと癒やし。感性が研ぎ澄まされています。' },
+        { id:'lavender', code:'#E6E6FA', name:'ラベンダー', msg:'繊細さと安らぎ。優しい気持ちに包まれたい時。' },
+        { id:'pink', code:'#FF2D55', name:'ピンク', msg:'愛と幸福。自分や他者を慈しみたい時です。' },
+        { id:'rose', code:'#FF69B4', name:'ローズ', msg:'華やかさと自信。魅力を発揮したい時。' },
+        { id:'magenta', code:'#FF00FF', name:'マゼンタ', msg:'深い愛と満足。日常の小さな幸せを感じています。' },
+        { id:'brown', code:'#A52A2A', name:'ブラウン', msg:'安心と基盤。落ち着いた時間を過ごしたい時。' },
+        { id:'beige', code:'#F5F5DC', name:'ベージュ', msg:'自然体と安心。ありのままの自分を肯定しています。' },
+        { id:'white', code:'#FFFFFF', name:'ホワイト', msg:'リセットと純粋。新しいページをめくる時。' },
+        { id:'gray', code:'#8E8E93', name:'グレー', msg:'ニュートラルと冷静。一旦立ち止まりたい状態。' },
+        { id:'black', code:'#000000', name:'ブラック', msg:'強い意志と守護。自分をしっかり持ちたい時。' },
+        { id:'gold', code:'#D4AF37', name:'ゴールド', msg:'価値と成功。自分の豊かさを認めたい時。' }
+    ];
+
+    let selectedColor = null;
+
+    // 24色のボタン作成
+    const grid = document.getElementById('grid');
+    colors.forEach(c => {
+        const btn = document.createElement('button');
+        btn.className = 'color-btn';
+        btn.style.backgroundColor = c.code;
+        btn.onclick = () => selectColor(c);
+        grid.appendChild(btn);
+    });
+
+    // 履歴の読み込み
+    loadHistory();
+
+    function selectColor(color) {
+        selectedColor = color;
+        const s1 = document.getElementById('step1');
+        s1.style.opacity = '0';
+        setTimeout(() => {
+            s1.style.display = 'none';
+            const inputSec = document.getElementById('input-section');
+            inputSec.style.display = 'block';
+            document.getElementById('selected-color-title').innerText = `${color.name}を選んだ理由は？`;
+        }, 500);
+    }
+
+    function saveAndShowResult() {
+        const reason = document.getElementById('reason-input').value || "（理由は記入されませんでした）";
+        
+        // ローカルストレージに保存
+        const history = JSON.parse(localStorage.getItem('colorHistory') || '[]');
+        history.unshift({ colorName: selectedColor.name, colorCode: selectedColor.code, reason: reason, date: new Date().toLocaleString() });
+        localStorage.setItem('colorHistory', JSON.stringify(history.slice(0, 10))); // 直近10件
+
+        // 背景切り替え（アニメーション）
+        document.body.style.backgroundColor = selectedColor.code;
+        if(['black', 'navy', 'forest', 'purple', 'deep-red'].includes(selectedColor.id)) {
+            document.body.style.color = "white";
+        }
+
+        document.getElementById('input-section').style.display = 'none';
+        const resSec = document.getElementById('result-section');
+        resSec.style.display = 'block';
+        
+        document.getElementById('res-name').innerText = selectedColor.name;
+        document.getElementById('res-user-reason').innerText = reason;
+        document.getElementById('res-message').innerText = selectedColor.msg;
+    }
+
+    function loadHistory() {
+        const history = JSON.parse(localStorage.getItem('colorHistory') || '[]');
+        const list = document.getElementById('history-list');
+        if(history.length === 0) {
+            list.innerHTML = "<p style='font-size:0.7rem; color:#999;'>まだ記録はありません。</p>";
+            return;
+        }
+        history.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'history-item';
+            div.innerHTML = `<div class="history-color-dot" style="background:${item.colorCode}"></div><div><strong>${item.date}</strong><br>${item.reason.substring(0, 20)}...</div>`;
+            list.appendChild(div);
+        });
+    }
+</script>
+</body>
+</html>
