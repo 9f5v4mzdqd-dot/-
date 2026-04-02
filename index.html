@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>自己対話カラーセラピー</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+
+/* 🌿 背景 */
+body {
+    font-family: 'Zen Maru Gothic', sans-serif;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+
+    background: linear-gradient(
+        135deg,
+        #f8f6f2,
+        #f1efe9,
+        #e8f0ee,
+        #f6f3f8
+    );
+
+    color: #5d5045;
+}
+
+/* 🌿 メインカード */
+.container {
+    width: 100%;
+    max-width: 520px;
+
+    background: rgba(255,255,255,0.8);
+    backdrop-filter: blur(12px);
+
+    padding: 30px;
+    border-radius: 28px;
+
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+/* タイトル */
+h1, h2 {
+    text-align: center;
+    color: #7a6a58;
+    letter-spacing: 0.08em;
+}
+
+/* 色ボタン */
+.color-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 14px;
+    margin-bottom: 30px;
+}
+
+.color-btn {
+    aspect-ratio: 1;
+    border-radius: 50%;
+    border: 3px solid white;
+    cursor: pointer;
+
+    box-shadow: 0 6px 14px rgba(0,0,0,0.1);
+    transition: 0.25s;
+}
+
+.color-btn:hover {
+    transform: scale(1.1);
+}
+
+/* 質問 */
+.question-box {
+    background: rgba(255,255,255,0.7);
+    padding: 20px;
+    border-radius: 20px;
+    margin-bottom: 20px;
+    border: 1px solid #eee;
+}
+
+textarea {
+    width: 100%;
+    height: 120px;
+    padding: 12px;
+    border-radius: 16px;
+    border: 1px solid #ddd;
+    font-family: inherit;
+}
+
+/* ボタン */
+.primary-btn {
+    width: 100%;
+    padding: 14px;
+    border-radius: 30px;
+    border: none;
+    background: linear-gradient(135deg,#a8d5c2,#cdb4db);
+    color: #444;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+/* カレンダー */
+.calendar-container {
+    margin-top: 30px;
+    border-top: 1px solid #eee;
+    padding-top: 20px;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+}
+
+.cal-day {
+    font-size: 0.7rem;
+    padding: 6px;
+    background: rgba(255,255,255,0.6);
+    border-radius: 10px;
+    min-height: 45px;
+    position: relative;
+}
+
+.cal-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin: 4px auto 0;
+    display: block;
+    border: 2px solid white;
+}
+
+/* 結果 */
+.tag {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+}
+
+.tag-pos { background:#e8f5ec; }
+.tag-neg { background:#fcebea; }
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<!-- STEP1 -->
+<div id="step1">
+    <h1>今のあなたを色に例えるなら？</h1>
+    <div class="color-grid" id="grid"></div>
+
+    <div class="calendar-container">
+        <div id="calendar"></div>
+    </div>
+</div>
+
+<!-- STEP2 -->
+<div id="insight-section" style="display:none;">
+    <h1 id="selected-name-display"></h1>
+
+    <div class="question-box">
+        <p id="dynamic-question"></p>
+        <textarea id="deep-memo"></textarea>
+    </div>
+
+    <button class="primary-btn" onclick="saveAndShow()">保存する</button>
+</div>
+
+<!-- STEP3 -->
+<div id="result-section" style="display:none;">
+    <h2 id="res-name"></h2>
+
+    <p id="res-pos"></p>
+    <p id="res-neg"></p>
+    <p id="res-memo"></p>
+
+    <button class="primary-btn" onclick="location.reload()">戻る</button>
+</div>
+
+</div>
+
+<script>
+
+const colors = [
+{code:'#FF6B6B',name:'レッド',q:'そのエネルギーを何に使いたい？',pos:'情熱',neg:'焦り'},
+{code:'#74B9FF',name:'ブルー',q:'本音は？',pos:'冷静',neg:'孤独'},
+{code:'#FFE66D',name:'イエロー',q:'ワクワクは？',pos:'希望',neg:'不安'},
+{code:'#86E3CE',name:'グリーン',q:'安心できる場所は？',pos:'調和',neg:'停滞'}
+];
+
+let selected=null;
+
+const grid=document.getElementById('grid');
+
+colors.forEach(c=>{
+    const b=document.createElement('div');
+    b.className='color-btn';
+    b.style.backgroundColor=c.code;
+
+    b.onclick=()=>{
+        selected=c;
+        document.getElementById('step1').style.display='none';
+        document.getElementById('insight-section').style.display='block';
+
+        document.getElementById('selected-name-display').innerText=c.name;
+        document.getElementById('dynamic-question').innerText=c.q;
+    };
+
+    grid.appendChild(b);
+});
+
+function saveAndShow(){
+    const memo=document.getElementById('deep-memo').value;
+
+    document.getElementById('insight-section').style.display='none';
+    document.getElementById('result-section').style.display='block';
+
+    document.getElementById('res-name').innerText=selected.name;
+    document.getElementById('res-pos').innerText=selected.pos;
+    document.getElementById('res-neg').innerText=selected.neg;
+    document.getElementById('res-memo').innerText=memo;
+}
+
+</script>
+
+</body>
+</html>
