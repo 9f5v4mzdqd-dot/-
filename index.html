@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ココイロ — 自己対話カラーセラピー</title>
+    <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600;700&family=Zen+Kaku+Gothic+New:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f7f4ef;
+            --card: rgba(255,255,255,0.85);
+            --ink: #3d3530;
+            --ink-light: #8a7e75;
+            --border: rgba(180,165,150,0.25);
+            --accent: #c9a97a;
+            --accent2: #8bbcaa;
+            --radius: 24px;
+            --shadow: 0 8px 32px rgba(80,60,40,0.09);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Zen Kaku Gothic New', sans-serif;
+            background: var(--bg);
+            color: var(--ink);
+            min-height: 100vh;
+            padding: 24px 16px 60px;
+            display: flex;
+            justify-content: center;
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.5), rgba(255,255,255,0.5)), 
+                url('https://images.unsplash.com/photo-1449247709967-d4461a6a6103?q=80&w=2071&auto=format&fit=crop');
+            background-size: cover;
+            background-attachment: fixed;
+        }
+
+        .app { width: 100%; max-width: 480px; display: flex; flex-direction: column; gap: 0; }
+
+        .header { text-align: center; padding: 32px 0 24px; }
+        .header-logo { font-family: 'Shippori Mincho', serif; font-size: 2rem; font-weight: 700; letter-spacing: 0.2em; color: var(--ink); }
+        .header-sub { margin-top: 6px; font-size: 0.75rem; letter-spacing: 0.2em; color: var(--ink-light); text-transform: uppercase; }
+
+        .card { background: var(--card); backdrop-filter: blur(14px); border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--border); overflow: hidden; padding: 24px; margin-bottom: 16px; }
+
+        .step { display: none; }
+        .step.active { display: block; }
+
+        .step-label { font-size: 0.65rem; letter-spacing: 0.2em; color: var(--ink-light); text-align: center; text-transform: uppercase; margin-bottom: 8px; }
+        .title-m { font-family: 'Shippori Mincho', serif; font-size: 1.1rem; text-align: center; line-height: 1.7; margin-bottom: 20px; }
+
+        /* カラーグリッド */
+        .color-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-bottom: 20px; }
+        .color-btn { aspect-ratio: 1; border-radius: 50%; border: 2px solid white; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .color-btn:hover { transform: scale(1.15); }
+
+        /* 天気選択 */
+        .weather-grid { display: flex; justify-content: space-around; margin-bottom: 25px; }
+        .weather-btn { background: white; border: 1px solid var(--border); border-radius: 15px; padding: 10px; font-size: 1.5rem; cursor: pointer; transition: 0.2s; opacity: 0.5; }
+        .weather-btn.selected { opacity: 1; border-color: var(--accent); transform: scale(1.1); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+
+        /* テキストエリア */
+        textarea { width: 100%; height: 120px; padding: 15px; border-radius: 16px; border: 1px solid var(--border); background: rgba(255,255,255,0.6); font-family: inherit; font-size: 0.9rem; margin-bottom: 15px; outline: none; }
+
+        /* カレンダー */
+        .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .cal-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+        .cal-day { aspect-ratio: 1; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.7rem; background: rgba(255,255,255,0.4); cursor: pointer; position: relative; }
+        .cal-dot-container { display: flex; gap: 2px; margin-top: 2px; }
+        .cal-dot { width: 6px; height: 6px; border-radius: 50%; border: 1px solid white; }
+
+        /* ボタン */
+        .btn-primary { width: 100%; padding: 14px; border-radius: 30px; border: none; background: linear-gradient(135deg, var(--accent2) 0%, var(--accent) 100%); color: white; cursor: pointer; font-family: inherit; font-size: 0.9rem; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .btn-ghost { width: 100%; padding: 12px; border-radius: 30px; border: 1px solid var(--border); background: transparent; color: var(--ink-light); cursor: pointer; margin-top: 10px; font-size: 0.8rem; }
+
+        /* ポップアップ */
+        .popup-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.3); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 100; padding: 20px; }
+        .popup-overlay.open { display: flex; }
+        .popup-card { background: white; border-radius: 24px; padding: 25px; width: 100%; max-width: 400px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+
+        .fadein { animation: fadein 0.5s ease both; }
+        @keyframes fadein { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+<div class="app">
+    <div class="header fadein">
+        <div class="header-logo">ココイロ</div>
+        <div class="header-sub">My Color / Self-dialogue</div>
+    </div>
+
+    <div id="step1" class="step active fadein">
+        <div class="card">
+            <div class="step-label">Step 1 / Now</div>
+            <div class="title-m">今のあなたの心は<br>何色をしていますか？</div>
+            <div class="color-grid" id="gridNow"></div>
+        </div>
+        <div class="card">
+            <div id="calTitle" style="font-family:'Shippori Mincho'; font-size:0.9rem; margin-bottom:10px; text-align:center;"></div>
+            <div class="cal-days" id="calDays"></div>
+        </div>
+    </div>
+
+    <div id="step2" class="step fadein">
+        <div class="card">
+            <div class="step-label">Step 2 / Future</div>
+            <div class="title-m">明日のあなたは<br>どんな色でいたいですか？</div>
+            <div class="color-grid" id="gridFuture"></div>
+            <button class="btn-ghost" onclick="showStep('step1')">選び直す</button>
+        </div>
+    </div>
+
+    <div id="step3" class="step fadein">
+        <div class="card">
+            <div class="step-label">Step 3 / Deepen</div>
+            <div class="title-m" id="randomQuestion"></div>
+            
+            <div class="weather-grid" id="weatherGrid">
+                <button class="weather-btn" onclick="selectWeather('☀️')">☀️</button>
+                <button class="weather-btn" onclick="selectWeather('☁️')">☁️</button>
+                <button class="weather-btn" onclick="selectWeather('☔️')">☔️</button>
+                <button class="weather-btn" onclick="selectWeather('⚡️')">⚡️</button>
+                <button class="weather-btn" onclick="selectWeather('🌈')">🌈</button>
+            </div>
+
+            <textarea id="memoArea" placeholder="言葉にならない感情も、そのままに..."></textarea>
+            <button class="btn-primary" onclick="saveRecord()">この記録を大切にしまう</button>
+            <button class="btn-ghost" onclick="showStep('step2')">戻る</button>
+        </div>
+    </div>
+</div>
+
+<div class="popup-overlay" id="popupOverlay" onclick="if(event.target==this)this.classList.remove('open')">
+    <div class="popup-card">
+        <div id="popDate" style="font-size:0.7rem; color:var(--ink-light); margin-bottom:10px;"></div>
+        <div id="popColors" style="display:flex; gap:10px; align-items:center; margin-bottom:15px;"></div>
+        <div id="popWeather" style="font-size:1.5rem; margin-bottom:10px;"></div>
+        <div id="popMemo" style="font-size:0.9rem; line-height:1.7; color:var(--ink); background:#fdfaf5; padding:15px; border-radius:15px;"></div>
+        <button class="btn-ghost" style="width:100%; margin-top:15px;" onclick="document.getElementById('popupOverlay').classList.remove('open')">閉じる</button>
+    </div>
+</div>
+
+<script>
+    const COLORS = [
+        { code:'#e85c5c', name:'レッド' }, { code:'#e8904a', name:'オレンジ' }, { code:'#e8c84a', name:'イエロー' },
+        { code:'#6abf7e', name:'グリーン' }, { code:'#4ab8c4', name:'ターコイズ' }, { code:'#5b9fe8', name:'ブルー' },
+        { code:'#9a6be8', name:'パープル' }, { code:'#e87ab0', name:'ピンク' }, { code:'#c49a6a', name:'ゴールド' },
+        { code:'#9a7a6a', name:'ブラウン' }, { code:'#3a3a4a', name:'ブラック' }, { code:'#f5f2ee', name:'ホワイト' }
+    ];
+
+    const QUESTIONS = [
+        "最近、誰かに言われて嬉しかった言葉は？",
+        "今、一番手放したいマイルールは何？",
+        "今日一日、頑張った自分に声をかけるなら？",
+        "今、一番「安心する」と感じるものは何？",
+        "明日、小さな幸せを一つ見つけるなら？"
+    ];
+
+    let currentEntry = { now: null, future: null, weather: '☀️', memo: '' };
+    const today = new Date();
+
+    function init() {
+        renderColorGrid('gridNow', (c) => { currentEntry.now = c; showStep('step2'); });
+        renderColorGrid('gridFuture', (c) => { 
+            currentEntry.future = c; 
+            document.getElementById('randomQuestion').innerText = QUESTIONS[Math.floor(Math.random() * QUESTIONS.length)];
+            showStep('step3'); 
+        });
+        renderCalendar();
+    }
+
+    function renderColorGrid(id, callback) {
+        const grid = document.getElementById(id);
+        COLORS.forEach(c => {
+            const btn = document.createElement('button');
+            btn.className = 'color-btn';
+            btn.style.background = c.code;
+            btn.onclick = () => callback(c);
+            grid.appendChild(btn);
+        });
+    }
+
+    function selectWeather(w) {
+        currentEntry.weather = w;
+        document.querySelectorAll('.weather-btn').forEach(btn => {
+            btn.classList.toggle('selected', btn.innerText === w);
+        });
+    }
+
+    function showStep(id) {
+        document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+
+    function saveRecord() {
+        const memo = document.getElementById('memoArea').value;
+        const key = `cocoiro_${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
+        const data = { ...currentEntry, memo, date: today.toLocaleDateString() };
+        localStorage.setItem(key, JSON.stringify(data));
+        location.reload();
+    }
+
+    function renderCalendar() {
+        const container = document.getElementById('calDays');
+        const title = document.getElementById('calTitle');
+        title.innerText = `${today.getFullYear()}年 ${today.getMonth() + 1}月`;
+        
+        const firstDay = new Date(today.getFullYear(), today.getMonth(), 1).getDay();
+        const lastDate = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+
+        for (let i = 0; i < firstDay; i++) container.appendChild(document.createElement('div'));
+
+        for (let d = 1; d <= lastDate; d++) {
+            const dayEl = document.createElement('div');
+            dayEl.className = 'cal-day';
+            dayEl.innerText = d;
+            
+            const key = `cocoiro_${today.getFullYear()}-${today.getMonth() + 1}-${d}`;
+            const record = JSON.parse(localStorage.getItem(key));
+            
+            if (record) {
+                const dots = document.createElement('div');
+                dots.className = 'cal-dot-container';
+                [record.now.code, record.future.code].forEach(color => {
+                    const dot = document.createElement('div');
+                    dot.className = 'cal-dot';
+                    dot.style.background = color;
+                    dots.appendChild(dot);
+                });
+                dayEl.appendChild(dots);
+                dayEl.onclick = () => showPopup(record, d);
+            }
+            container.appendChild(dayEl);
+        }
+    }
+
+    function showPopup(rec, d) {
+        document.getElementById('popDate').innerText = `${today.getFullYear()}年${today.getMonth()+1}月${d}日`;
+        document.getElementById('popColors').innerHTML = `
+            <div style="text-align:center"><div class="cal-dot" style="width:20px; height:20px; background:${rec.now.code}"></div><span style="font-size:0.6rem">現在</span></div>
+            <div style="font-size:0.8rem">→</div>
+            <div style="text-align:center"><div class="cal-dot" style="width:20px; height:20px; background:${rec.future.code}"></div><span style="font-size:0.6rem">未来</span></div>
+        `;
+        document.getElementById('popWeather').innerText = rec.weather;
+        document.getElementById('popMemo').innerText = rec.memo || "（メモはありません）";
+        document.getElementById('popupOverlay').classList.add('open');
+    }
+
+    init();
+    selectWeather('☀️'); // 初期選択
+</script>
+
+</body>
+</html>
