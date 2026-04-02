@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>自己対話カラーセラピー</title>
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Zen Maru Gothic', sans-serif;
+            margin: 0; padding: 20px;
+            display: flex; flex-direction: column; align-items: center;
+            min-height: 100vh;
+            /* お気に入りの白木目URLに差し替えてください */
+            background-image: linear-gradient(rgba(255,255,255,0.5), rgba(255,255,255,0.5)), 
+                              url('https://images.unsplash.com/photo-1449247709967-d4461a6a6103?q=80&w=2071&auto=format&fit=crop');
+            background-size: cover; background-position: center; background-attachment: fixed;
+            color: #5d5045; transition: background-color 1.2s ease;
+        }
+
+        .container {
+            width: 100%; max-width: 500px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 30px; border-radius: 40px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.05);
+            backdrop-filter: blur(10px); box-sizing: border-box;
+        }
+
+        h1 { font-size: 1.2rem; color: #8b7355; margin-bottom: 25px; text-align: center; }
+        .color-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin-bottom: 30px; }
+        .color-btn {
+            aspect-ratio: 1; border: 3px solid white; border-radius: 50%;
+            cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: 0.3s;
+        }
+        .color-btn:hover { transform: scale(1.1); }
+
+        /* 深掘りセクション */
+        #insight-section, #result-section { display: none; }
+        .question-box { background: #fdfaf5; padding: 20px; border-radius: 25px; margin-bottom: 20px; text-align: left; border: 1px solid #eee1d3; }
+        .question-box p { font-size: 0.9rem; margin-bottom: 15px; color: #a68b6d; font-weight: bold; }
+        
+        textarea {
+            width: 100%; height: 120px; padding: 15px; border-radius: 20px;
+            border: 2px solid #efedea; font-family: inherit; font-size: 0.95rem;
+            box-sizing: border-box; outline: none; background: white;
+        }
+
+        .primary-btn {
+            background: #b8a28a; color: white; border: none; width: 100%;
+            padding: 16px; border-radius: 50px; font-size: 1rem; cursor: pointer;
+            font-family: inherit; box-shadow: 0 5px 15px rgba(184, 162, 138, 0.3); margin-top: 10px;
+        }
+
+        /* カレンダー */
+        .calendar-container { margin-top: 40px; border-top: 2px solid #f0ede9; padding-top: 30px; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; }
+        .cal-day {
+            font-size: 0.7rem; padding: 5px; background: rgba(255,255,255,0.6);
+            border-radius: 12px; min-height: 45px; position: relative; cursor: pointer;
+        }
+        .cal-dot { width: 12px; height: 12px; border-radius: 50%; margin: 4px auto 0; display: block; border: 2px solid white; }
+        
+        /* ツールチップ（ホバーでメモ表示） */
+        .cal-day:hover::after {
+            content: attr(data-memo); position: absolute; bottom: 110%; left: 50%;
+            transform: translateX(-50%); background: #5d5045; color: white;
+            padding: 8px 12px; border-radius: 10px; font-size: 0.75rem;
+            white-space: pre-wrap; width: 150px; z-index: 10; display: block;
+        }
+
+        /* 結果画面 */
+        .meaning-card { text-align: left; line-height: 1.8; margin: 20px 0; }
+        .tag { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 0.8rem; margin-bottom: 5px; }
+        .tag-pos { background: #e9f5db; color: #718355; }
+        .tag-neg { background: #fcebe9; color: #e56b6f; }
+    </style>
+</head>
+<body>
+
+<div class="container fade-in">
+    <div id="step1">
+        <h1>今のあなたを色に例えるなら？</h1>
+        <div class="color-grid" id="grid"></div>
+        <div class="calendar-container">
+            <h3 id="calendar-title" style="font-size:0.9rem; color:#8b7355; text-align:center;"></h3>
+            <div class="calendar-grid" id="calendar"></div>
+        </div>
+    </div>
+
+    <div id="insight-section" class="fade-in">
+        <h1 id="selected-name-display"></h1>
+        <div class="question-box">
+            <p id="dynamic-question"></p>
+            <textarea id="deep-memo" placeholder="頭に浮かんだことをそのまま書き出してみて..."></textarea>
+        </div>
+        <button class="primary-btn" onclick="saveAndShow()">自分と向き合い、保存する</button>
+    </div>
+
+    <div id="result-section" class="fade-in">
+        <h2 id="res-name"></h2>
+        <div class="meaning-card">
+            <span class="tag tag-pos">光の側面（満たされている時）</span>
+            <p id="res-pos" style="margin-top:0; margin-bottom:20px; font-size:0.95rem;"></p>
+            <span class="tag tag-neg">影の側面（少しお疲れの時）</span>
+            <p id="res-neg" style="margin-top:0; margin-bottom:20px; font-size:0.95rem;"></p>
+            <div style="background:#fff; padding:15px; border-radius:20px; border:1px dashed #d3c4b1;">
+                <span style="font-size:0.8rem; color:#8b7355; font-weight:bold;">今日の心の記録：</span><br>
+                <p id="res-memo" style="margin:5px 0 0; font-size:0.9rem;"></p>
+            </div>
+        </div>
+        <button class="primary-btn" onclick="location.reload()">カレンダーに戻る</button>
+    </div>
+</div>
+
+<script>
+    const colors = [
+        { id:'red', code:'#FF6B6B', name:'レッド', q:'そのエネルギーを何に使いたい？', pos:'生命力に溢れ、情熱を形にする力がみなぎっています。', neg:'焦りや怒りとして現れることも。休息を忘れないで。' },
+        { id:'blue', code:'#74B9FF', name:'ブルー', q:'今、一番静かに伝えたい本音は何？', pos:'冷静で誠実。自分の内面と深く繋がれています。', neg:'孤独感や、言葉にできない寂しさを抱えているかも。' },
+        { id:'yellow', code:'#FFE66D', name:'イエロー', q:'最近、ワクワクしたことはあった？', pos:'知的好奇心と希望。新しい光を見つける天才です。', neg:'考えすぎて空回りしたり、他人の評価が気になる時。' },
+        { id:'green', code:'#86E3CE', name:'グリーン', q:'「安心できる場所」はどこ？', pos:'調和と癒やし。周りを穏やかにする力があります。', neg:'変化を怖がり、現状維持に固執してしまっているかも。' },
+        { id:'orange', code:'#FFBE76', name:'オレンジ', q:'誰と一緒に笑いたい気分？', pos:'明るさと社交性。喜びをシェアする力が高い時。', neg:'依存心が強まったり、ショックを隠している可能性も。' },
+        { id:'purple', code:'#D6A2E8', name:'パープル', q:'今、直感で信じられるものは？', pos:'高い精神性と直感力。自分だけの世界を大切に。', neg:'現実逃避したくなったり、心がひどく繊細な状態。' },
+        { id:'pink', code:'#FFB8B8', name:'ピンク', q:'自分に優しくしてあげてる？', pos:'愛情深く、受容する力。自分を慈しめる状態です。', neg:'誰かに愛されたい欲求が強く、少し甘えたいサイン。' },
+        { id:'turquoise', code:'#81ECEC', name:'ターコイズ', q:'新しく始めたい自由なことは？', pos:'クリエイティブな自由。新しい自分を表現できます。', neg:'自分の殻に閉じこもり、複雑な心境に迷い込む時。' },
+        { id:'magenta', code:'#F368E0', name:'マゼンタ', pos:'日常に感謝できる深い愛。', neg:'完璧主義になり、他人の世話で自分を削る傾向。', q:'今、手放してもいい「こだわり」は？' },
+        { id:'white', code:'#FFFFFF', name:'ホワイト', pos:'純粋なリセット状態。', neg:'潔癖になりすぎ、空虚さを感じている可能性。', q:'新しく描きたい「真っ白な未来」は？' },
+        { id:'black', code:'#576574', name:'ブラック', pos:'強い意志とプロテクト力。', neg:'強い不安や重圧を一人で抱え込んでいるサイン。', q:'今、一番守りたいものは何？' },
+        { id:'gold', code:'#E1B12C', name:'ゴールド', pos:'自信と豊かな価値観。', neg:'プライドが邪魔をして、素直になれない状態。', q:'あなたが誇れる「自分の価値」は何？' },
+        // ... 他の色も同様に深掘り設定可能
+    ];
+
+    let selected = null;
+    const today = new Date();
+    const dateKey = `${today.getFullYear()}-${today.getMonth()+1}-${today.getDate()}`;
+
+    const grid = document.getElementById('grid');
+    colors.forEach(c => {
+        const b = document.createElement('button');
+        b.className = 'color-btn';
+        b.style.backgroundColor = c.code;
+        b.onclick = () => {
+            selected = c;
+            document.getElementById('step1').style.display = 'none';
+            document.getElementById('insight-section').style.display = 'block';
+            document.getElementById('selected-name-display').innerText = c.name;
+            document.getElementById('dynamic-question').innerText = c.q;
+        };
+        grid.appendChild(b);
+    });
+
+    function initCalendar() {
+        const cal = document.getElementById('calendar');
+        const history = JSON.parse(localStorage.getItem('colorLogDeep') || '{}');
+        const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+        document.getElementById('calendar-title').innerText = `${today.getFullYear()}年 ${today.getMonth()+1}月`;
+
+        for (let i = 1; i <= daysInMonth; i++) {
+            const dayDiv = document.createElement('div');
+            dayDiv.className = 'cal-day';
+            dayDiv.innerText = i;
+            const key = `${today.getFullYear()}-${today.getMonth()+1}-${i}`;
+            if (history[key]) {
+                const dot = document.createElement('span');
+                dot.className = 'cal-dot';
+                dot.style.backgroundColor = history[key].code;
+                dayDiv.appendChild(dot);
+                dayDiv.setAttribute('data-memo', history[key].memo || '記録あり');
+            }
+            cal.appendChild(dayDiv);
+        }
+    }
+
+    function saveAndShow() {
+        const memo = document.getElementById('deep-memo').value;
+        const history = JSON.parse(localStorage.getItem('colorLogDeep') || '{}');
+        history[dateKey] = { code: selected.code, name: selected.name, memo: memo, pos: selected.pos, neg: selected.neg };
+        localStorage.setItem('colorLogDeep', JSON.stringify(history));
+
+        document.getElementById('insight-section').style.display = 'none';
+        document.getElementById('result-section').style.display = 'block';
+        document.getElementById('res-name').innerText = selected.name;
+        document.getElementById('res-pos').innerText = selected.pos;
+        document.getElementById('res-neg').innerText = selected.neg;
+        document.getElementById('res-memo').innerText = memo || "（静かに過ごした日）";
+    }
+
+    initCalendar();
+</script>
+</body>
+</html>
