@@ -4,60 +4,130 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>心に寄り添う 24色のカラーセラピー</title>
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        /* 癒やし系フォントと背景の設定 */
-        @import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@300;400;700&display=swap');
-
         body {
-            font-family: 'Zen Maru Gothic', serif;
-            /* 白の木目調をCSSのグラデーションとパターンで再現 */
-            background-color: #fdfbf7;
-            background-image: 
-                linear-gradient(90deg, rgba(255,255,255,0.5) 50%, transparent 50%),
-                linear-gradient(rgba(240,230,210,0.2) 1px, transparent 1px);
-            background-size: 100px 100%, 100% 20px;
-            color: #555;
-            margin: 0; padding: 20px;
-            display: flex; flex-direction: column; align-items: center;
-            min-height: 100vh; transition: background 1s ease;
+            font-family: 'Zen Maru Gothic', sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            /* 白の木目調画像を背景に設定 */
+            background-image: url('https://www.toptal.com/designers/subtlepatterns/uploads/whitewood.png');
+            background-repeat: repeat;
+            background-attachment: fixed;
+            color: #5d5045;
+            transition: background-color 1.2s ease;
         }
 
-        .container { width: 100%; max-width: 500px; text-align: center; background: rgba(255,255,255,0.7); padding: 20px; border-radius: 30px; backdrop-filter: blur(5px); }
+        /* コンテンツの器を少し透けさせて背景を活かす */
+        .container {
+            width: 100%;
+            max-width: 480px;
+            background: rgba(255, 255, 255, 0.85);
+            padding: 25px;
+            border-radius: 35px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            backdrop-filter: blur(4px);
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        h1 { font-size: 1.3rem; color: #8b7355; margin-bottom: 20px; }
         
-        h1 { font-size: 1.4rem; color: #6d5d4b; }
+        /* ふわっとしたアニメーション */
         .fade-in { animation: fadeIn 1s ease forwards; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* 24色のグリッド */
-        .color-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin: 20px 0; }
-        .color-btn {
-            aspect-ratio: 1; border: none; border-radius: 50%; cursor: pointer;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1); transition: 0.3s;
+        /* 24色のグリッド：スマホで見やすいよう調整 */
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 12px;
+            margin: 20px 0;
         }
-        .color-btn:hover { transform: translateY(-5px) scale(1.1); }
+        .color-btn {
+            aspect-ratio: 1;
+            border: 3px solid white;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+            transition: 0.3s;
+        }
+        .color-btn:active { transform: scale(0.9); }
 
-        /* 入力エリア */
+        /* 入力・結果エリア */
         #input-section, #result-section { display: none; }
         textarea {
-            width: 100%; height: 120px; padding: 15px; border-radius: 20px;
-            border: 2px solid #e0d5c5; font-family: inherit; font-size: 1rem;
-            box-sizing: border-box; margin-bottom: 20px; outline: none;
+            width: 100%;
+            height: 140px;
+            padding: 15px;
+            border-radius: 20px;
+            border: 2px solid #eee1d3;
+            font-family: inherit;
+            font-size: 1rem;
+            box-sizing: border-box;
+            margin-bottom: 20px;
+            outline: none;
+            background: rgba(255,255,255,0.5);
         }
         .primary-btn {
-            background: #8e7d6b; color: white; border: none; padding: 12px 35px;
-            border-radius: 30px; font-size: 1rem; cursor: pointer; font-family: inherit;
+            background: #a68b6d;
+            color: white;
+            border: none;
+            padding: 14px 40px;
+            border-radius: 40px;
+            font-size: 1rem;
+            cursor: pointer;
+            font-family: inherit;
+            box-shadow: 0 4px 10px rgba(166,139,109,0.3);
         }
 
-        /* カレンダー表示 */
-        .calendar-container { margin-top: 40px; border-top: 2px solid #e0d5c5; padding-top: 20px; }
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-top: 10px; }
-        .cal-day { font-size: 0.7rem; padding: 5px; min-height: 40px; background: rgba(255,255,255,0.5); border-radius: 8px; position: relative; }
-        .cal-dot { width: 12px; height: 12px; border-radius: 50%; margin: 2px auto; display: block; border: 1px solid #ddd; }
+        /* カレンダー */
+        .calendar-container {
+            margin-top: 35px;
+            border-top: 1px dashed #d3c4b1;
+            padding-top: 25px;
+        }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+            margin-top: 15px;
+        }
+        .cal-day {
+            font-size: 0.75rem;
+            padding: 8px 2px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 12px;
+            min-height: 45px;
+        }
+        .cal-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            margin: 4px auto 0;
+            display: block;
+            border: 2px solid white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
 
-        /* 結果メッセージの装飾 */
-        .meaning-box { text-align: left; background: white; padding: 20px; border-radius: 20px; margin: 15px 0; font-size: 0.95rem; line-height: 1.7; }
-        .pos { color: #d4a373; font-weight: bold; }
-        .neg { color: #8d99ae; font-weight: bold; }
+        /* メッセージ詳細 */
+        .meaning-box {
+            text-align: left;
+            background: rgba(255,255,255,0.95);
+            padding: 25px;
+            border-radius: 25px;
+            margin: 20px 0;
+            line-height: 1.8;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.03);
+        }
+        .label { font-weight: bold; font-size: 0.9rem; margin-bottom: 5px; display: inline-block; }
+        .pos { color: #b5834a; }
+        .neg { color: #7a8a99; }
+        .memo-text { font-size: 0.9rem; color: #666; white-space: pre-wrap; }
     </style>
 </head>
 <body>
@@ -68,25 +138,24 @@
         <div class="color-grid" id="grid"></div>
         
         <div class="calendar-container">
-            <h3>心のログ・カレンダー</h3>
-            <div id="calendar-title" style="font-size:0.9rem; margin-bottom:10px;"></div>
+            <h3 id="calendar-title"></h3>
             <div class="calendar-grid" id="calendar"></div>
         </div>
     </div>
 
     <div id="input-section" class="fade-in">
         <h1 id="selected-title"></h1>
-        <textarea id="reason-input" placeholder="今の気持ちを自由に書き留めてみましょう..."></textarea>
-        <button class="primary-btn" onclick="saveAndShow()">この気持ちを保存する</button>
+        <textarea id="reason-input" placeholder="今の気持ちを、ゆっくりと言葉にしてみましょう..."></textarea>
+        <button class="primary-btn" onclick="saveAndShow()">この気持ちを大切に保存する</button>
     </div>
 
     <div id="result-section" class="fade-in">
         <h2 id="res-name"></h2>
         <div class="meaning-box">
-            <p><span class="pos">【プラスの面】</span><br><span id="res-pos"></span></p>
-            <p><span class="neg">【注意したい面】</span><br><span id="res-neg"></span></p>
-            <hr style="border:0; border-top:1px dashed #eee;">
-            <p style="font-size:0.8rem; color:#888;">今日のメモ：<br><span id="res-memo"></span></p>
+            <div><span class="label pos">● プラスの面</span><br><span id="res-pos"></span></div>
+            <div style="margin-top:15px;"><span class="label neg">● 注意したい面</span><br><span id="res-neg"></span></div>
+            <hr style="border:0; border-top:1px dashed #d3c4b1; margin:20px 0;">
+            <div><span class="label" style="color:#8b7355;">● あなたのメモ</span><br><p id="res-memo" class="memo-text"></p></div>
         </div>
         <button class="primary-btn" onclick="location.reload()">カレンダーに戻る</button>
     </div>
@@ -94,37 +163,36 @@
 
 <script>
     const colors = [
-        { id:'red', code:'#FF4B2B', name:'レッド', pos:'情熱、勇気、生命力にあふれています。', neg:'少し怒りっぽかったり、焦りを感じているかも。' },
-        { id:'blue', code:'#2193b0', name:'ブルー', pos:'誠実、冷静、平和。心が落ち着いています。', neg:'孤独感や、本音を言えないもどかしさがあるかも。' },
-        { id:'yellow', code:'#fdd835', name:'イエロー', pos:'希望、幸福、知的好奇心が高まっています。', neg:'周りに合わせすぎて自分を見失いやすい時かも。' },
-        { id:'green', code:'#56ab2f', name:'グリーン', pos:'癒やし、調和、バランスが取れています。', neg:'変化を恐れて現状に固執しているかもしれません。' },
-        { id:'orange', code:'#f39c12', name:'オレンジ', pos:'社交性、喜び、温かな人間関係。', neg:'誰かに依存したい、寂しさを埋めたい気持ちかも。' },
-        { id:'purple', code:'#a4508b', name:'パープル', pos:'直感、インスピレーション、高い感性。', neg:'現実逃避や、精神的に疲れを感じているかも。' },
-        { id:'pink', code:'#ff758c', name:'ピンク', pos:'愛情、優しさ、幸福感に満ちています。', neg:'自分を甘やかしすぎたり、愛に飢えているかも。' },
-        { id:'turquoise', code:'#00cec9', name:'ターコイズ', pos:'独創性、自由、新しい自己表現。', neg:'自分の殻に閉じこもり、複雑な心境かもしれません。' },
-        { id:'magenta', code:'#e84393', name:'マゼンタ', pos:'深い慈愛、完璧な調和、満足感。', neg:'他人の世話を焼きすぎて、自分が疲弊しているかも。' },
-        { id:'white', code:'#ffffff', name:'ホワイト', pos:'リセット、純粋、新しいスタート。', neg:'完璧主義になりすぎて、自分を追い込んでいるかも。' },
-        { id:'black', code:'#2d3436', name:'ブラック', pos:'強い意志、威厳、自分を守る力。', neg:'不安を隠したり、心を閉ざしてしまっているかも。' },
-        { id:'gold', code:'#d4af37', name:'ゴールド', pos:'価値、自信、豊かな可能性。', neg:'虚栄心や、自分を大きく見せたい心理があるかも。' },
-        { id:'lavender', code:'#b19cd9', name:'ラベンダー', pos:'上品な癒やし、精神的な安らぎ。', neg:'少し神経質になり、デリケートな状態かも。' },
-        { id:'royal-blue', code:'#002366', name:'ロイヤルブルー', pos:'深い知恵、直感、誠実さ。', neg:'権威的になりすぎたり、心を硬くしているかも。' },
-        { id:'lime', code:'#cddc39', name:'ライム', pos:'若々しさ、フレッシュ、新たな成長。', neg:'苦労が多く、酸っぱい思いをしている最中かも。' },
-        { id:'brown', code:'#6d4c41', name:'ブラウン', pos:'安定、基盤、安心感。', neg:'保守的になりすぎて、頑固になっているかも。' },
-        { id:'beige', code:'#f5f5dc', name:'ベージュ', pos:'自然体、調和、飾らない心。', neg:'無難にまとめようとして、個性を抑えているかも。' },
-        { id:'olive', code:'#808000', name:'オリーブ', pos:'知恵、平和、粘り強さ。', neg:'困難な状況に耐え、少し疲弊しているかも。' },
-        { id:'sky', code:'#87ceeb', name:'スカイブルー', pos:'解放、広い心、コミュニケーション。', neg:'現実の厳しさから逃れたい気持ちがあるかも。' },
-        { id:'emerald', code:'#50c878', name:'エメラルド', pos:'豊かさ、精神的成長、バランス。', neg:'嫉妬や、他人との比較に苦しんでいるかも。' },
-        { id:'peach', code:'#ffdab9', name:'ピーチ', pos:'思いやり、柔らかさ、親しみやすさ。', neg:'傷つきやすく、デリケートな心境かも。' },
-        { id:'ruby', code:'#e0115f', name:'ルビー', pos:'強い生命力、カリスマ、愛情。', neg:'感情が爆発しやすく、攻撃的になっているかも。' },
-        { id:'navy', code:'#000080', name:'ネイビー', pos:'信頼、規律、深い知性。', neg:'枠にとらわれすぎて、窮屈さを感じているかも。' },
-        { id:'silver', code:'#c0c0c0', name:'シルバー', pos:'洗練、控えめな光、変容。', neg:'自分を出しきれず、冷めた目で見ているかも。' }
+        { id:'red', code:'#FF5E5E', name:'レッド', pos:'情熱、勇気、生命力にあふれています。', neg:'少し怒りっぽかったり、焦りを感じているかも。' },
+        { id:'blue', code:'#5DA2D5', name:'ブルー', pos:'誠実、冷静、平和。心が落ち着いています。', neg:'孤独感や、本音を言えないもどかしさがあるかも。' },
+        { id:'yellow', code:'#FFE066', name:'イエロー', pos:'希望、幸福、知的好奇心が高まっています。', neg:'周りに合わせすぎて自分を見失いやすい時かも。' },
+        { id:'green', code:'#91C788', name:'グリーン', pos:'癒やし、調和、バランスが取れています。', neg:'変化を恐れて現状に固執しているかもしれません。' },
+        { id:'orange', code:'#FFB37E', name:'オレンジ', pos:'社交性、喜び、温かな人間関係。', neg:'誰かに依存したい、寂しさを埋めたい気持ちかも。' },
+        { id:'purple', code:'#B19CD9', name:'パープル', pos:'直感、インスピレーション、高い感性。', neg:'現実逃避や、精神的に疲れを感じているかも。' },
+        { id:'pink', code:'#FFB7B2', name:'ピンク', pos:'愛情、優しさ、幸福感に満ちています。', neg:'自分を甘やかしすぎたり、愛に飢えているかも。' },
+        { id:'turquoise', code:'#81E6D9', name:'ターコイズ', pos:'独創性、自由、新しい自己表現。', neg:'自分の殻に閉じこもり、複雑な心境かもしれません。' },
+        { id:'magenta', code:'#FF8DC7', name:'マゼンタ', pos:'深い慈愛、完璧な調和、満足感。', neg:'他人の世話を焼きすぎて、自分が疲弊しているかも。' },
+        { id:'white', code:'#FFFFFF', name:'ホワイト', pos:'リセット、純粋、新しいスタート。', neg:'完璧主義になりすぎて、自分を追い込んでいるかも。' },
+        { id:'black', code:'#4A4E69', name:'ブラック', pos:'強い意志、威厳、自分を守る力。', neg:'不安を隠したり、心を閉ざしてしまっているかも。' },
+        { id:'gold', code:'#D4AF37', name:'ゴールド', pos:'価値、自信、豊かな可能性。', neg:'虚栄心や、自分を大きく見せたい心理があるかも。' },
+        { id:'lavender', code:'#E6E6FA', name:'ラベンダー', pos:'上品な癒やし、精神的な安らぎ。', neg:'少し神経質になり、デリケートな状態かも。' },
+        { id:'royal-blue', code:'#34495E', name:'ロイヤルブルー', pos:'深い知恵、直感、誠実さ。', neg:'権威的になりすぎたり、心を硬くしているかも。' },
+        { id:'lime', code:'#D4E157', name:'ライム', pos:'若々しさ、フレッシュ、新たな成長。', neg:'苦労が多く、酸っぱい思いをしている最中かも。' },
+        { id:'brown', code:'#8D6E63', name:'ブラウン', pos:'安定、基盤、安心感。', neg:'保守的になりすぎて、頑固になっているかも。' },
+        { id:'beige', code:'#EFD9B4', name:'ベージュ', pos:'自然体、調和、飾らない心。', neg:'無難にまとめようとして、個性を抑えているかも。' },
+        { id:'olive', code:'#BAB86C', name:'オリーブ', pos:'知恵、平和、粘り強さ。', neg:'困難な状況に耐え、少し疲弊しているかも。' },
+        { id:'sky', code:'#AED9DA', name:'スカイブルー', pos:'解放、広い心、コミュニケーション。', neg:'現実の厳しさから逃れたい気持ちがあるかも。' },
+        { id:'emerald', code:'#50C878', name:'エメラルド', pos:'豊かさ、精神的成長、バランス。', neg:'嫉妬や、他人との比較に苦しんでいるかも。' },
+        { id:'peach', code:'#FFCCBB', name:'ピーチ', pos:'思いやり、柔らかさ、親しみやすさ。', neg:'傷つきやすく、デリケートな心境かも。' },
+        { id:'ruby', code:'#D10056', name:'ルビー', pos:'強い生命力、カリスマ、愛情。', neg:'感情が爆発しやすく、攻撃的になっているかも。' },
+        { id:'navy', code:'#1A237E', name:'ネイビー', pos:'信頼、規律、深い知性。', neg:'枠にとらわれすぎて、窮屈さを感じているかも。' },
+        { id:'silver', code:'#BDC3C7', name:'シルバー', pos:'洗練、控えめな光、変容。', neg:'自分を出しきれず、冷めた目で見ているかも。' }
     ];
 
     let selected = null;
     const today = new Date();
     const dateKey = `${today.getFullYear()}-${today.getMonth()+1}-${today.getDate()}`;
 
-    // グリッド作成
     const grid = document.getElementById('grid');
     colors.forEach(c => {
         const b = document.createElement('button');
@@ -139,7 +207,6 @@
         grid.appendChild(b);
     });
 
-    // カレンダー作成
     function initCalendar() {
         const cal = document.getElementById('calendar');
         const history = JSON.parse(localStorage.getItem('colorLog') || '{}');
@@ -167,7 +234,7 @@
         history[dateKey] = { code: selected.code, name: selected.name, memo: memo, pos: selected.pos, neg: selected.neg };
         localStorage.setItem('colorLog', JSON.stringify(history));
 
-        document.body.style.background = selected.code;
+        document.body.style.backgroundColor = selected.code;
         document.getElementById('input-section').style.display = 'none';
         document.getElementById('result-section').style.display = 'block';
         document.getElementById('res-name').innerText = selected.name;
