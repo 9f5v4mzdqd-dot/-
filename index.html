@@ -1,0 +1,37 @@
+<script>
+    /* （中略：COLORS定義や基本設定はそのまま） */
+
+    function generateReflection(memo, colorNow, colorFuture) {
+        const words = memo.split(/[、。！？\s\n]+/).filter(w => w.length > 0);
+        
+        // 言葉がない場合のフォールバック
+        if (words.length === 0) {
+            return `「${colorNow.name}」という今の質感と、「${colorFuture.name}」が示す${colorFuture.view}。そのグラデーションの中に、今のあなたがいます。`;
+        }
+
+        const sampleWord = words[Math.floor(Math.random() * words.length)];
+        
+        // 今の色からの視点
+        const viewNow = `今の「${colorNow.name}」というフィルターを通すと、あなたの「${sampleWord}」という言葉は、${colorNow.view}として響きます。`;
+        
+        // 未来の色からの視点（別の角度からの景色）
+        const viewFuture = `一方で、あなたが願う「${colorFuture.name}」の場所からは、同じ「${sampleWord}」が${colorFuture.view}という新しい景色に見えるはずです。`;
+
+        return `${viewNow}<br><br>${viewFuture}`;
+    }
+
+    async function goToResult() {
+        const memo = document.getElementById('memoArea').value;
+        currentEntry.memo = memo;
+        showStep('step4');
+
+        // 二つの色とメモを掛け合わせる
+        const reflectionText = generateReflection(memo, currentEntry.now, currentEntry.future);
+        
+        const fullText = `${reflectionText}<br><br>色が移り変わるように、感情もまた、留まることはありません。その揺らぎを、否定せずに見つめていてください。<span class="answer-highlight">答えは外側ではなく、あなたの中にあります。</span>`;
+        
+        typeWriter(document.getElementById('insightBox'), fullText);
+        currentEntry.insight = fullText;
+    }
+    /* （以下略：UIやカレンダーのコードは維持） */
+</script>
